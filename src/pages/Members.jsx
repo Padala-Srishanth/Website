@@ -38,7 +38,7 @@ export default function Members() {
             const domain = values[3].trim();
 
             if (id) {
-              db[id] = { name, batch, domain };
+              db[id] = { id, name, batch, domain };
             }
           }
         }
@@ -156,7 +156,7 @@ export default function Members() {
               </div>
               <div className="text-right hidden sm:block">
                 <p className="text-white/60 text-sm uppercase tracking-wide">Member ID</p>
-                <p className="text-white font-mono text-xl">{memberId.toUpperCase()}</p>
+                <p className="text-white font-mono text-xl">{memberData.id}</p>
               </div>
             </div>
 
@@ -168,7 +168,7 @@ export default function Members() {
                     <span className="text-sm font-medium uppercase tracking-wide">ID</span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900 font-mono">
-                    {memberId.toUpperCase()}
+                    {memberData.id}
                   </p>
                 </div>
 
