@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import { Search, User, Calendar, Briefcase, Hash } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from "react";
+import { Search, User, Calendar, Briefcase, Hash } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Members() {
-  const [memberId, setMemberId] = useState('');
+  const [memberId, setMemberId] = useState("");
   const [memberData, setMemberData] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // State for storing the full member database
   const [membersDatabase, setMembersDatabase] = useState({});
   const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch('/Members/VJDQ_2028_members.csv');
+        const response = await fetch("/Members/VJDQ_2028_members.csv");
         const text = await response.text();
 
         // Parse CSV
-        const lines = text.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        const lines = text.split("\n");
+        const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
 
         const db = {};
 
@@ -29,7 +29,7 @@ export default function Members() {
 
           // Handle potential commas in fields by using a regex or simple split if simple CSV
           // Assuming simple CSV based on file content viewed
-          const values = lines[i].split(',');
+          const values = lines[i].split(",");
 
           if (values.length >= 4) {
             const name = values[0].trim();
@@ -38,7 +38,7 @@ export default function Members() {
             const domain = values[3].trim();
 
             if (id) {
-              db[id] = { name, batch, domain };
+              db[id] = { name, batch, domain, id };
             }
           }
         }
@@ -56,11 +56,11 @@ export default function Members() {
   }, []);
 
   const handleSearch = () => {
-    setError('');
+    setError("");
     setMemberData(null);
 
     if (!memberId.trim()) {
-      setError('Please enter a Member ID');
+      setError("Please enter a Member ID");
       return;
     }
 
@@ -68,13 +68,14 @@ export default function Members() {
 
     if (member) {
       setMemberData(member);
+      console.log(member);
     } else {
-      setError('Member ID not found. Please check and try again.');
+      setError("Member ID not found. Please check and try again.");
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -96,7 +97,10 @@ export default function Members() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8">
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="w-full flex-1">
-              <label htmlFor="memberId" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="memberId"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Member ID
               </label>
               <div className="relative">
@@ -124,7 +128,7 @@ export default function Members() {
           {error && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-center border border-red-100"
             >
               <span className="mr-2">⚠️</span> {error}
@@ -155,8 +159,10 @@ export default function Members() {
                 </div>
               </div>
               <div className="text-right hidden sm:block">
-                <p className="text-white/60 text-sm uppercase tracking-wide">Member ID</p>
-                <p className="text-white font-mono text-xl">{memberId.toUpperCase()}</p>
+                <p className="text-white/60 text-sm uppercase tracking-wide">
+                  Member ID
+                </p>
+                <p className="text-white font-mono text-xl">{memberData.id}</p>
               </div>
             </div>
 
@@ -165,17 +171,21 @@ export default function Members() {
                 <div className="p-4 rounded-xl bg-[#f8f9fa] border border-gray-100">
                   <div className="flex items-center gap-3 mb-2 text-gray-500">
                     <Hash className="w-4 h-4" />
-                    <span className="text-sm font-medium uppercase tracking-wide">ID</span>
+                    <span className="text-sm font-medium uppercase tracking-wide">
+                      ID
+                    </span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900 font-mono">
-                    {memberId.toUpperCase()}
+                    {memberData.id}
                   </p>
                 </div>
 
                 <div className="p-4 rounded-xl bg-[#f8f9fa] border border-gray-100">
                   <div className="flex items-center gap-3 mb-2 text-gray-500">
                     <Calendar className="w-4 h-4" />
-                    <span className="text-sm font-medium uppercase tracking-wide">Batch</span>
+                    <span className="text-sm font-medium uppercase tracking-wide">
+                      Batch
+                    </span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900">
                     {memberData.batch}
@@ -185,7 +195,9 @@ export default function Members() {
                 <div className="p-4 rounded-xl bg-[#f8f9fa] border border-gray-100">
                   <div className="flex items-center gap-3 mb-2 text-gray-500">
                     <Briefcase className="w-4 h-4" />
-                    <span className="text-sm font-medium uppercase tracking-wide">Domain</span>
+                    <span className="text-sm font-medium uppercase tracking-wide">
+                      Domain
+                    </span>
                   </div>
                   <p className="text-lg font-semibold text-gray-900">
                     {memberData.domain}
