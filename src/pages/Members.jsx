@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Search, User, Calendar, Briefcase, Hash } from "lucide-react";
+import { Search, User, Calendar, Briefcase, Hash, MessageCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Members() {
@@ -14,12 +14,12 @@ export default function Members() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const response = await fetch("/Members/VJDQ_2028_members.csv");
+        const response = await fetch("/Members/VJDQ_MEMBER_DETAILS_24-28 - DOMAIN_DIVISION_FINAL.csv");
         const text = await response.text();
 
         // Parse CSV
         const lines = text.split("\n");
-        const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+        // Headers are: SNO,Name,Roll Number,DS,Section,DQ IDS FF,DOMAIN ASSIGNED,WHATSAPP LINK
 
         const db = {};
 
@@ -28,17 +28,19 @@ export default function Members() {
           if (!lines[i].trim()) continue;
 
           // Handle potential commas in fields by using a regex or simple split if simple CSV
-          // Assuming simple CSV based on file content viewed
+          // The file seems to be simple CSV.
           const values = lines[i].split(",");
 
-          if (values.length >= 4) {
-            const name = values[0].trim();
-            const id = values[1].trim().toUpperCase();
-            const batch = values[2].trim();
-            const domain = values[3].trim();
+          if (values.length >= 7) {
+            const name = values[1].trim();
+            const id = values[5].trim().toUpperCase();
+            // Batch is not in CSV, assuming 2028 based on filename/context
+            const batch = "2028";
+            const domain = values[6].trim();
+            const whatsappLink = values[7] ? values[7].trim() : "";
 
             if (id) {
-              db[id] = { name, batch, domain, id };
+              db[id] = { name, batch, domain, id, whatsappLink };
             }
           }
         }
@@ -70,7 +72,23 @@ export default function Members() {
       setMemberData(member);
       console.log(member);
     } else {
-      setError("Member ID not found. Please check and try again.");
+      // Check if ID is in the range VJDQ2K25001 to VJDQ2K25148
+      const idPattern = /^VJDQ2K25(\d{3})$/i;
+      const match = memberId.match(idPattern);
+
+      let showDomainError = false;
+      if (match) {
+        const number = parseInt(match[1], 10);
+        if (number >= 1 && number <= 148) {
+          showDomainError = true;
+        }
+      }
+
+      if (showDomainError) {
+        setError("You haven't opted for domain division. Please contact the following Team Relation Representatives.");
+      } else {
+        setError("Member ID not found. Please check and try again.");
+      }
     }
   };
 
@@ -129,9 +147,49 @@ export default function Members() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="mt-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-center border border-red-100"
+              className={`mt-4 p-4 rounded-xl border ${error.includes("domain division")
+                ? "bg-blue-50 border-blue-100"
+                : "bg-red-50 border-red-100 text-red-700"
+                }`}
             >
-              <span className="mr-2">⚠️</span> {error}
+              <div className="flex items-center gap-3">
+                <span className="text-xl">
+                  {error.includes("domain division") ? "⚠️" : "⚠️"}
+                </span>
+                <p className={`font-medium ${error.includes("domain division") ? "text-blue-800" : "text-red-700"}`}>
+                  {error}
+                </p>
+              </div>
+
+              {error.includes("domain division") && (
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[
+                    { id: 1, name: "Srishanth", image: "/teamImages/Srishanth-2027.png", phone: "918919776534" },
+                    { id: 2, name: "Sahasra", image: "/teamImages/Sahasra-2027.png", phone: "919346477090" },
+                    { id: 3, name: "Shashank", image: "/teamImages/Shashank-2027.png", phone: "918639950475" }
+                  ].map((rep) => (
+                    <div key={rep.id} className="bg-white p-4 rounded-lg border border-blue-100 shadow-sm flex flex-col items-center text-center">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full mb-3 overflow-hidden">
+                        <img
+                          src={rep.image}
+                          alt={rep.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="font-semibold text-gray-900">{rep.name}</h3>
+                      <p className="text-sm text-gray-500 mb-2">TRR</p>
+                      <a
+                        href={`https://wa.me/${rep.phone}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-white font-medium bg-green-500 px-3 py-1 rounded-full hover:bg-green-600 transition-colors"
+                      >
+                        Contact via WhatsApp
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
         </div>
@@ -204,10 +262,26 @@ export default function Members() {
                   </p>
                 </div>
               </div>
+
+              <div className="mt-8 flex justify-center">
+                <button
+                  className="flex items-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#128C7E] transition-colors shadow-sm"
+                  onClick={() => {
+                    if (memberData.whatsappLink) {
+                      window.open(memberData.whatsappLink, "_blank");
+                    } else {
+                      alert("WhatsApp link not available for this member.");
+                    }
+                  }}
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Join WhatsApp Group
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
       </div>
-    </div>
+    </div >
   );
 }
